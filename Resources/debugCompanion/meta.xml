@@ -15,8 +15,10 @@
 	<export function="httpRefreshResources" http="true" type="server" />
 
     <script src="exports/debugLog.lua" type="server" />
+	<script src="exports/clientDebug.lua" type="client" cache="false" />
 	<export function="httpGetDebugLog" http="true" type="server" />
 	<export function="httpGetDebugLogSince" http="true" type="server" />
+	<export function="httpGetDebugLogCursor" http="true" type="server" />
 
     <script src="exports/tests.lua" type="server" />
 	<export function="httpRunResourceTests" http="true" type="server" />

@@ -1,104 +1,62 @@
-﻿using ModelContextProtocol.Server;
+using ModelContextProtocol.Server;
 using MtaDebugCompanionMcp.Common.Clients;
 using System.ComponentModel;
 
 namespace MtaDebugCompanionMcp.Common.Tools;
 
-public enum ScriptSide { Server, Client, Shared }
-
-/// <summary>
-/// This class contains the tools that are exposed to the AI agent for accessing information from the MTA wiki
-/// </summary>
-/// <param name="wikiScraper"></param>
 [McpServerToolType]
-[Description("Tools that allow access certain actions on the MTA server")]
+[Description("Ações no servidor MTA (resources, logs, Lua). Respostas curtas em texto.")]
 public class MtaDebugCompanionTools(MtaServerDebugClient mtaServer)
 {
-    private const string MtaLogoUrl = "https://wiki.multitheftauto.com/images/thumb/5/58/Mtalogo.png/100px-Mtalogo.png";
+    private const string LogHelp = "limit: quantos registros (padrão 30, máx 200, vêm os mais recentes). level: 1 só erros, 2 +avisos, 3 +info, 4 tudo (padrão). contains: texto na mensagem ou no arquivo. side: server ou client. includeNoise: inclui o ruído filtrado por padrão (hook do heaven_monitor).";
 
-    [McpServerTool(Name = nameof(RunCode), IconSource = MtaLogoUrl)]
-    [Description("""
-        Runs any arbitrary Lua code on the MTA server, for the purpose of debugging. Will return any result from the code that was run. 
-        If running more than a single statement returned information can be obtained using:
-        (function()
-            -- code here
-            return toJSON({ --[[ any value here ]] })
-        end)()
-        """)]
-    public Task<string> RunCode(string code)
-    {
-        return mtaServer.RunCode(code);
-    }
+    [McpServerTool(Name = nameof(RunCode))]
+    [Description("Executa Lua no servidor. Para vários comandos: (function() ... return toJSON({...}) end)()")]
+    public Task<string> RunCode(string code) => mtaServer.RunCode(code);
 
-    [McpServerTool(Name = nameof(RestartResource), IconSource = MtaLogoUrl)]
-    [Description("Restarts the specified resource on the MTA server.")]
-    public Task<string> RestartResource(string name)
-    {
-        return mtaServer.RestartResource(name);
-    }
+    [McpServerTool(Name = nameof(RestartResource))]
+    [Description("Reinicia um resource. Devolve ok ou erro.")]
+    public Task<string> RestartResource(string name) => mtaServer.RestartResource(name);
 
-    [McpServerTool(Name = nameof(StartResource), IconSource = MtaLogoUrl)]
-    [Description("Starts the specified resource on the MTA server.")]
-    public Task<string> StartResource(string name)
-    {
-        return mtaServer.StartResource(name);
-    }
+    [McpServerTool(Name = nameof(StartResource))]
+    [Description("Inicia um resource. Devolve ok ou erro.")]
+    public Task<string> StartResource(string name) => mtaServer.StartResource(name);
 
-    [McpServerTool(Name = nameof(StopResource), IconSource = MtaLogoUrl)]
-    [Description("Stops the specified resource on the MTA server.")]
-    public Task<string> StopResource(string name)
-    {
-        return mtaServer.StopResource(name);
-    }
+    [McpServerTool(Name = nameof(StopResource))]
+    [Description("Para um resource. Devolve ok ou erro.")]
+    public Task<string> StopResource(string name) => mtaServer.StopResource(name);
 
-    [McpServerTool(Name = nameof(GetLogs), IconSource = MtaLogoUrl)]
-    [Description("Retrieves the latest 100 lines of debug logs.")]
-    public Task<string> GetLogs()
-    {
-        return mtaServer.GetLogs();
-    }
+    [McpServerTool(Name = nameof(GetResourceState))]
+    [Description("Estado de um resource (running, loaded, stopped...).")]
+    public Task<string> GetResourceState(string name) => mtaServer.GetResourceState(name);
 
-    [McpServerTool(Name = nameof(ListResources), IconSource = MtaLogoUrl)]
-    [Description("Lists MTA resources with their current state and metadata.")]
-    public Task<string> ListResources()
-    {
-        return mtaServer.ListResources();
-    }
+    [McpServerTool(Name = nameof(ListResources))]
+    [Description("Sem filtro: contagem por estado e os nomes só dos fora do normal (failed to load); state=loaded lista os parados. Com state e/ou contains: os nomes que casam.")]
+    public Task<string> ListResources(string? state = null, string? contains = null) => mtaServer.ListResources(state, contains);
 
-    [McpServerTool(Name = nameof(GetResourceState), IconSource = MtaLogoUrl)]
-    [Description("Gets the current state of one MTA resource.")]
-    public Task<string> GetResourceState(string name)
-    {
-        return mtaServer.GetResourceState(name);
-    }
+    [McpServerTool(Name = nameof(RefreshResources))]
+    [Description("Atualiza a lista de resources (depois de criar, remover ou renomear arquivos).")]
+    public Task<string> RefreshResources() => mtaServer.RefreshResources();
 
-    [McpServerTool(Name = nameof(RefreshResources), IconSource = MtaLogoUrl)]
-    [Description("Refreshes the MTA resource list after files are added or changed.")]
-    public Task<string> RefreshResources()
-    {
-        return mtaServer.RefreshResources();
-    }
+    [McpServerTool(Name = nameof(GetLogs))]
+    [Description("Últimos registros do debug, uma linha cada: nível lado hora mensagem (arquivo:linha). Repetições seguidas viram xN. " + LogHelp)]
+    public Task<string> GetLogs(int limit = 30, int level = 4, string? contains = null, string? side = null, bool includeNoise = false) =>
+        mtaServer.GetLogs(limit, level, contains, side, includeNoise);
 
-    [McpServerTool(Name = nameof(GetLogsSince), IconSource = MtaLogoUrl)]
-    [Description("Retrieves debug logs created after the specified cursor.")]
-    public Task<string> GetLogsSince(long cursor)
-    {
-        return mtaServer.GetLogsSince(cursor);
-    }
+    [McpServerTool(Name = nameof(GetLogCursor))]
+    [Description("Só o marcador atual dos logs. Use antes de pedir um teste e depois leia com GetLogsSince.")]
+    public Task<string> GetLogCursor() => mtaServer.GetLogCursor();
 
-    [McpServerTool(Name = nameof(DeployAndVerifyResource), IconSource = MtaLogoUrl)]
-    [Description("Starts or restarts one resource, confirms its final state, and returns newly created debug logs.")]
-    public Task<string> DeployAndVerifyResource(string name)
-    {
-        return mtaServer.DeployAndVerifyResource(name);
-    }
+    [McpServerTool(Name = nameof(GetLogsSince))]
+    [Description("Registros depois de um marcador; o cabeçalho traz o marcador novo. " + LogHelp)]
+    public Task<string> GetLogsSince(long cursor, int limit = 30, int level = 4, string? contains = null, string? side = null, bool includeNoise = false) =>
+        mtaServer.GetLogsSince(cursor, limit, level, contains, side, includeNoise);
 
-    [McpServerTool(Name = nameof(RunResourceTests), IconSource = MtaLogoUrl)]
-    [Description("Runs the optional server-side runDebugTests export of one running resource.")]
-    public Task<string> RunResourceTests(string name)
-    {
-        return mtaServer.RunResourceTests(name);
-    }
+    [McpServerTool(Name = nameof(DeployAndVerifyResource))]
+    [Description("Inicia ou reinicia um resource, espera subir e devolve uma linha de resumo mais os registros novos que citam o resource (e qualquer erro). Aguenta resources lentos como o heaven_loader.")]
+    public Task<string> DeployAndVerifyResource(string name, int limit = 20) => mtaServer.DeployAndVerifyResource(name, limit);
 
-
+    [McpServerTool(Name = nameof(RunResourceTests))]
+    [Description("Roda o export runDebugTests de um resource em execução.")]
+    public Task<string> RunResourceTests(string name) => mtaServer.RunResourceTests(name);
 }

@@ -45,19 +45,18 @@ Available tools:
   Starts the specified resource.
 - `StopResource(string name)`  
   Stops the specified resource.
-- `GetLogs()`  
-  Retrieves the latest ~100 lines of debug logs.
-- `ListResources()`
-  Lists available resources with their state and metadata.
-- `GetResourceState(string name)`
-  Gets the state of one resource.
-- `RefreshResources()`
-  Refreshes the MTA resource list after files change.
-- `GetLogsSince(long cursor)`
-  Retrieves only debug messages created after one log cursor.
-- `DeployAndVerifyResource(string name)`
-  Starts or restarts one resource, confirms its final state, and returns new debug logs.
-- `RunResourceTests(string name)`
+- `GetLogs(limit=30, level=4, contains, side, includeNoise)`
+  Latest debug messages, one text line each (`level side time message (file:line)`); consecutive repeats collapse to `xN`. `level`: 1 errors, 2 +warnings, 3 +info, 4 all. Known noise (the `heaven_monitor` debug-hook denials) is hidden unless `includeNoise` is true.
+- `GetLogCursor()`
+  Only the current log marker. Take one before asking for a test, then read with `GetLogsSince`.
+- `GetLogsSince(cursor, limit=30, level=4, contains, side, includeNoise)`
+  Messages after a marker; the header line carries the new marker.
+- `DeployAndVerifyResource(name, limit=20)`
+  Starts or restarts one resource asynchronously (slow ones such as `heaven_loader` are fine), waits for the final state and returns one summary line plus the new log lines that mention the resource (and any error).
+- `ListResources(state, contains)`
+  Without filters: counts per state and the names of only the abnormal ones (`failed to load`...). With filters: the names that match.
+- `RestartResource`, `StartResource`, `StopResource`, `RefreshResources` return `ok` or `erro: ...`; `GetResourceState` returns the state text.
+- `RunResourceTests(name)`
   Runs the optional `runDebugTests` export of a resource.
 
 ### Usage

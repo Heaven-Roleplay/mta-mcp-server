@@ -19,7 +19,7 @@ public static class MtaDebugCompanionMcpServiceCollectionExtensions
             {
                 x.BaseAddress = new Uri(baseAddress ?? "http://localhost:22005");
                 x.DefaultRequestHeaders.Add("api-key", apiKey ?? "default");
-                x.Timeout = TimeSpan.FromSeconds(10);
+                x.Timeout = TimeSpan.FromSeconds(90);
 
                 if (!string.IsNullOrWhiteSpace(username) && !string.IsNullOrWhiteSpace(password))
                 {
