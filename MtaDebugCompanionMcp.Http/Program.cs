@@ -5,7 +5,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddJsonFile("appsettings.local.json", optional: true, reloadOnChange: true);
 
-builder.Services.AddMtaDebugCompanionMcpServices(builder.Configuration.GetValue<string>("serverHost"), builder.Configuration.GetValue<string>("apiKey"));
+builder.Services.AddMtaDebugCompanionMcpServices(
+    builder.Configuration.GetValue<string>("serverHost"),
+    builder.Configuration.GetValue<string>("apiKey"),
+    builder.Configuration.GetValue<string>("serverUsername"),
+    builder.Configuration.GetValue<string>("serverPassword")
+);
 
 builder.Services
     .AddMcpServer()

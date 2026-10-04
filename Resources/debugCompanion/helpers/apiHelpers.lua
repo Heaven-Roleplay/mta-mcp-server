@@ -1,48 +1,39 @@
-local apiKey
+local apiKey = false
 
 function verifyApiKey()
-    if not apiKey or not requestHeaders then
+    if not apiKey or type(requestHeaders) ~= "table" then
         return false
     end
 
-    local header = requestHeaders["api-key"]
+    local header = false
+    for name, value in pairs(requestHeaders) do
+        if string.lower(name) == "api-key" then
+            header = value
+            break
+        end
+    end
 
-    return header == apiKey
+    return type(header) == "string" and header == apiKey
 end
 
 function loadApiKey()
-    local setting = get("@apiKey")
-    
-    if setting then
-        apiKey = setting
-
-        if apiKey == "default" then
-            outputServerLog("Default API key detected, you can change it with /generatekey")
-            addCommandHandler("generatekey", generateApiKey, false, false)
-        end
+    local file = fileOpen("config.private.json")
+    if not file then
+        outputServerLog("[debugCompanion] API key ausente. Configure config.private.json antes de usar o MCP.")
+        return false
     end
-end
 
-function generateApiKey()
-    local setting = get("@apiKey")
-    
-    if setting == "default" then
-        local key = generateRandomString(32)
-        set("@apiKey", key)
-        apiKey = key
+    local content = fileRead(file, fileGetSize(file))
+    fileClose(file)
 
-        outputServerLog("A new key was generated: " .. key)
+    local config = fromJSON(content)
+    if type(config) ~= "table" or type(config.apiKey) ~= "string" or config.apiKey == "" then
+        outputServerLog("[debugCompanion] config.private.json possui uma API key inválida.")
+        return false
     end
-end
 
-function generateRandomString(length)
-    local charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-    local randomString = ""
-    for i = 1, length do
-        local randomIndex = math.random(1, #charset)
-        randomString = randomString .. charset:sub(randomIndex, randomIndex)
-    end
-    return randomString
+    apiKey = config.apiKey
+    return true
 end
 
 loadApiKey()

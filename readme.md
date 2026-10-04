@@ -47,12 +47,25 @@ Available tools:
   Stops the specified resource.
 - `GetLogs()`  
   Retrieves the latest ~100 lines of debug logs.
+- `ListResources()`
+  Lists available resources with their state and metadata.
+- `GetResourceState(string name)`
+  Gets the state of one resource.
+- `RefreshResources()`
+  Refreshes the MTA resource list after files change.
+- `GetLogsSince(long cursor)`
+  Retrieves only debug messages created after one log cursor.
+- `DeployAndVerifyResource(string name)`
+  Starts or restarts one resource, confirms its final state, and returns new debug logs.
+- `RunResourceTests(string name)`
+  Runs the optional `runDebugTests` export of a resource.
 
 ### Usage
 
 - Run the `debugCompanion` resource on the MTA server.
-  - You might need to give `user.*` access to `resource.debugCompanion.http` in ACL in order for the MCP server to be able to access the companion resource.
-- If you changed the default hostname or API key, make sure to update the values in the project's `appsettings.json` / `appsettings.local.json` so the MCP can communicate with the server.
+- Create `Resources/debugCompanion/config.private.json` from the example and set a long random `apiKey`. This file is intentionally ignored by Git and is not downloaded by clients.
+- Create a dedicated MTA account and ACL that grants only `resource.debugCompanion.http`; do not grant the MCP account admin or wildcard permissions.
+- Set `serverHost`, `apiKey`, `serverUsername`, and `serverPassword` in `MtaDebugCompanionMcp.Http/appsettings.local.json`. Keep this file outside version control.
 - Run the MCP locally (the HTTP MCP exposes the service on the local host).
 - Add the MCP to your `mcp.json` (or IDE equivalent) pointing at the local URL (default local port used by the HTTP host is 5277):
 

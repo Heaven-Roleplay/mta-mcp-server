@@ -1,11 +1,26 @@
 local debugLogCache = {}
 local MAX_DEBUG_LOG = 100
+local debugLogCursor = 0
 
 local function addToDebugCache(entry)
+	debugLogCursor = debugLogCursor + 1
+	entry.id = debugLogCursor
 	table.insert(debugLogCache, entry)
 	if #debugLogCache > MAX_DEBUG_LOG then
 		table.remove(debugLogCache, 1)
 	end
+end
+
+local function getLogsSince(cursor)
+	local entries = {}
+	for index = 1, #debugLogCache do
+		local entry = debugLogCache[index]
+		if entry.id > cursor then
+			entries[#entries + 1] = entry
+		end
+	end
+
+	return entries
 end
 
 local function onDebugMessageHandler(debugMessage, debugLevel, debugFile, debugLine, debugRed, debugGreen, debugBlue)
@@ -33,3 +48,14 @@ function httpGetDebugLog()
 	return toJSON(debugLogCache)
 end
 
+function httpGetDebugLogSince(cursor)
+	if not verifyApiKey() then
+		return "Unauthorised"
+	end
+
+	local lastCursor = tonumber(cursor) or 0
+	return toJSON({
+		cursor = debugLogCursor,
+		entries = getLogsSince(lastCursor),
+	})
+end

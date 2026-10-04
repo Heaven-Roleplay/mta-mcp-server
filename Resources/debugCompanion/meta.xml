@@ -1,4 +1,6 @@
 <meta>
+    <info author="Heaven Roleplay" name="debugCompanion" type="script" version="1.0.0" />
+
     <script src="helpers/apiHelpers.lua" type="server" />
     
     <script src="exports/runcode.lua" type="server" />
@@ -8,13 +10,18 @@
 	<export function="httpRestartResource" http="true" type="server" />
 	<export function="httpStartResource" http="true" type="server" />
 	<export function="httpStopResource" http="true" type="server" />
+	<export function="httpListResources" http="true" type="server" />
+	<export function="httpGetResourceState" http="true" type="server" />
+	<export function="httpRefreshResources" http="true" type="server" />
 
     <script src="exports/debugLog.lua" type="server" />
 	<export function="httpGetDebugLog" http="true" type="server" />
+	<export function="httpGetDebugLogSince" http="true" type="server" />
 
-    <settings>
-        <setting name="@apiKey" value="default"/>
-    </settings>
+    <script src="exports/tests.lua" type="server" />
+	<export function="httpRunResourceTests" http="true" type="server" />
+	<export function="runDebugTests" type="server" />
+    <file src="config.private.json" download="false" />
 
     <aclrequest>
         <right name="resource.debugCompanion.http" access="true"/>
@@ -23,5 +30,7 @@
         <right name="function.restartResource" access="true"/>
         <right name="function.startResource" access="true"/>
         <right name="function.stopResource" access="true"/>
+        <right name="function.refreshResources" access="true"/>
+        <right name="function.call" access="true"/>
     </aclrequest>
 </meta>

@@ -58,5 +58,47 @@ public class MtaDebugCompanionTools(MtaServerDebugClient mtaServer)
         return mtaServer.GetLogs();
     }
 
+    [McpServerTool(Name = nameof(ListResources), IconSource = MtaLogoUrl)]
+    [Description("Lists MTA resources with their current state and metadata.")]
+    public Task<string> ListResources()
+    {
+        return mtaServer.ListResources();
+    }
+
+    [McpServerTool(Name = nameof(GetResourceState), IconSource = MtaLogoUrl)]
+    [Description("Gets the current state of one MTA resource.")]
+    public Task<string> GetResourceState(string name)
+    {
+        return mtaServer.GetResourceState(name);
+    }
+
+    [McpServerTool(Name = nameof(RefreshResources), IconSource = MtaLogoUrl)]
+    [Description("Refreshes the MTA resource list after files are added or changed.")]
+    public Task<string> RefreshResources()
+    {
+        return mtaServer.RefreshResources();
+    }
+
+    [McpServerTool(Name = nameof(GetLogsSince), IconSource = MtaLogoUrl)]
+    [Description("Retrieves debug logs created after the specified cursor.")]
+    public Task<string> GetLogsSince(long cursor)
+    {
+        return mtaServer.GetLogsSince(cursor);
+    }
+
+    [McpServerTool(Name = nameof(DeployAndVerifyResource), IconSource = MtaLogoUrl)]
+    [Description("Starts or restarts one resource, confirms its final state, and returns newly created debug logs.")]
+    public Task<string> DeployAndVerifyResource(string name)
+    {
+        return mtaServer.DeployAndVerifyResource(name);
+    }
+
+    [McpServerTool(Name = nameof(RunResourceTests), IconSource = MtaLogoUrl)]
+    [Description("Runs the optional server-side runDebugTests export of one running resource.")]
+    public Task<string> RunResourceTests(string name)
+    {
+        return mtaServer.RunResourceTests(name);
+    }
+
 
 }
